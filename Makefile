@@ -1,4 +1,4 @@
-all: eventRacer.cma
+all: eventRacer.cma dumpLog
 
 OBJECTS=ActionLog.o StringSet.o Interface.o
 CXXFLAGS=-g -O2 -fPIC -Wall -Wextra
@@ -13,6 +13,9 @@ uninstall:
 	ocamlfind remove event-racer
 
 reinstall: uninstall install
+
+dumpLog: eventRacer.cma dumpLog.ml
+	ocamlfind ocamlc -o $@ -package fmt -linkpkg eventRacer.cma dumpLog.ml
 
 clean:
 	rm -f *.o *.cm* *.a *.so
