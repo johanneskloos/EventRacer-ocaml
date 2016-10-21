@@ -145,7 +145,7 @@ value parse_event_action(strings& strings, const ActionLog::EventAction& e) {
     int i = 0;
     for (std::vector<ActionLog::Command>::const_iterator it = e.m_commands.begin();
             it != e.m_commands.end(); it++) {
-        Store_field(commands, i, parse_command(strings, *it));
+        Store_field(commands, i++, parse_command(strings, *it));
     }
     return result;
 }
