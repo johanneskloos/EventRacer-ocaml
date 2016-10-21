@@ -108,24 +108,28 @@ struct strings {
 
 value parse_command(strings& strings, ActionLog::Command cmd) {
     int tag;
+    value result;
+    cached_string_set *str = nullptr;
     switch (cmd.m_cmdType) {
         case ActionLog::ENTER_SCOPE:
-            tag = 0; break;
+            tag = 0; str = &strings.scopes; break;
         case ActionLog::READ_MEMORY:
-            tag = 1; break;
+            tag = 1; str = &strings.vars; break;
         case ActionLog::WRITE_MEMORY:
-            tag = 2; break;
+            tag = 2; str = &strings.vars; break;
         case ActionLog::TRIGGER_ARC:
-            tag = 3; break;
+            result = caml_alloc(1, 3);
+            Store_field(result, 0, Int_val(cmd.m_location));
+            return result;
         case ActionLog::MEMORY_VALUE:
-            tag = 4; break;
+            tag = 4; str = &strings.memValues; break;
         case ActionLog::EXIT_SCOPE:
             return Val_int(0);
         default:
             throw new parse_exception();
     }
-    value result = caml_alloc(1, tag);
-    Store_field(result, 0, int_to_reference(strings.scopes, cmd.m_location));
+    result = caml_alloc(1, tag);
+    Store_field(result, 0, int_to_reference(*str, cmd.m_location));
     return result;
 }
 
