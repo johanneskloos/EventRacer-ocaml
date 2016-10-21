@@ -8,7 +8,7 @@ type command =
   | Exit_scope
   | Read_memory of reference
   | Write_memory of reference
-  | Post of reference
+  | Post of int
   | Value of reference
 
 type event_action_type =
@@ -31,7 +31,7 @@ type event_action = {
 
 type event_log = {
   events: event_action array;
-  args: arc array;
+  arcs: arc array;
 }
 
 exception OpenException

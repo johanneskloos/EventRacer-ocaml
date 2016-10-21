@@ -13,8 +13,8 @@ let pp_command pp = function
       prefix (const string "Reading from ") pp_reference pp ref
   | Write_memory ref ->
       prefix (const string "Writing to ") pp_reference pp ref
-  | Post ref ->
-      prefix (const string "Posting task ") pp_reference pp ref
+  | Post id ->
+      prefix (const string "Posting task ") int pp id
   | Value ref ->
       prefix (const string "Value ") pp_reference pp ref
   | Exit_scope ->
@@ -34,15 +34,15 @@ let pp_arc pp { tail; head; duration } =
   else
     pf pp "%d -%d-> %d" tail duration head
 
-let pp_event_action pp { evtype; commands } =
-  pf pp "@[<v2>Event, cause: %a {@ %a@]@ }@ "
+let pp_event_action pp (i, { evtype; commands }) =
+  pf pp "@[<v2>Event %d, cause: %a {@ %a@]@ }@ " i
     pp_event_action_type evtype
     (array ~sep:sp pp_command) commands
 
-let pp_event_log pp { events; args } =
+let pp_event_log pp { events; arcs } =
   pf pp "@[<v>Events:@ %a@ @ @[<v2>Arcs:@ %a@ @]@]"
-    (array ~sep:sp pp_event_action) events
-    (array ~sep:sp pp_arc) args
+    (iter_bindings ~sep:sp Array.iteri pp_event_action) events
+    (array ~sep:sp pp_arc) arcs
 
 let dump_one filename =
   try
