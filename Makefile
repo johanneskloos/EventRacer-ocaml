@@ -18,3 +18,11 @@ $(LIBBASE).cma $(LIBBASE).cmxa $(LIBBASE).a dll$(LIBBASE).so: \
 
 clean:
 	rm -f *~ *.cm* *.o *.a *.so $(PROGRAMS)
+
+install: $(LIBBASE).cma
+	ocamlfind install event-racer META *.a *.so $(LIBBASE).cma $(LIBBASE).cmxa
+
+remove:
+	ocamlfind remove event-racer
+
+reinstall: remove install
