@@ -27,6 +27,13 @@
 #include <caml/fail.h>
 #include <caml/callback.h>
 
+inline void set_field(value v, uint8_t i, value x) {
+    Store_field(v, i, x);
+}
+inline value val_int(int x) {
+    return Val_int(x);
+}
+
 struct cached_string_set {
     const StringSet& _strings;
     std::map<int, value> _cache;
@@ -40,11 +47,11 @@ struct cached_string_set {
         value result;
         if (val == nullptr) {
             result = caml_alloc(1, 1);
-            Store_field(result, 0, Val_int(i));
+            set_field(result, 0, val_int(i));
         } else {
             result = caml_alloc(2, 0);
-            Store_field(result, 0, Val_int(i));
-            Store_field(result, 1, caml_copy_string(val));
+            set_field(result, 0, val_int(i));
+            set_field(result, 1, caml_copy_string(val));
         }
         _cache[i] = result;
         return result;
@@ -87,7 +94,7 @@ const log load(const char *filename) {
 
 value int_to_reference(cached_string_set& strings, int ref) {
     if (ref < 0) {
-        return Val_int(0);
+        return val_int(0);
     } else {
         return strings.to_value(ref);
     }
@@ -119,37 +126,37 @@ value parse_command(strings& strings, ActionLog::Command cmd) {
             tag = 2; str = &strings.vars; break;
         case ActionLog::TRIGGER_ARC:
             result = caml_alloc(1, 3);
-            Store_field(result, 0, Int_val(cmd.m_location));
+            set_field(result, 0, val_int(cmd.m_location));
             return result;
         case ActionLog::MEMORY_VALUE:
             tag = 4; str = &strings.memValues; break;
         case ActionLog::EXIT_SCOPE:
-            return Val_int(0);
+            return val_int(0);
         default:
             throw new parse_exception();
     }
     result = caml_alloc(1, tag);
-    Store_field(result, 0, int_to_reference(*str, cmd.m_location));
+    set_field(result, 0, int_to_reference(*str, cmd.m_location));
     return result;
 }
 
 value parse_arc(ActionLog::Arc a) {
     value result = caml_alloc_tuple(3);
-    Store_field(result, 0, Val_int(a.m_tail));
-    Store_field(result, 1, Val_int(a.m_head));
-    Store_field(result, 2, Val_int(a.m_duration));
+    set_field(result, 0, val_int(a.m_tail));
+    set_field(result, 1, val_int(a.m_head));
+    set_field(result, 2, val_int(a.m_duration));
     return result;
 }
 
 value parse_event_action(strings& strings, const ActionLog::EventAction& e) {
     value result = caml_alloc_tuple(2);
-    Store_field(result, 0, Val_int(e.m_type));
     value commands = caml_alloc_tuple(e.m_commands.size());
-    Store_field(result, 1, commands);
+    set_field(result, 0, val_int(e.m_type));
+    set_field(result, 1, commands);
     int i = 0;
     for (std::vector<ActionLog::Command>::const_iterator it = e.m_commands.begin();
             it != e.m_commands.end(); it++) {
-        Store_field(commands, i++, parse_command(strings, *it));
+        set_field(commands, i++, parse_command(strings, *it));
     }
     return result;
 }
@@ -157,17 +164,17 @@ value parse_event_action(strings& strings, const ActionLog::EventAction& e) {
 value parse_event_log(strings& strings, const ActionLog& log) {
     value result = caml_alloc_tuple(2);
     value events = caml_alloc_tuple(log.maxEventActionId());
-    Store_field(result, 0, events);
+    set_field(result, 0, events);
     for (int i = 0; i < log.maxEventActionId(); i++) {
-        Store_field(events, i, parse_event_action(strings, log.event_action(i)));
+        set_field(events, i, parse_event_action(strings, log.event_action(i)));
     }
     const std::vector<ActionLog::Arc>& arcs_in(log.arcs());
     value arcs = caml_alloc_tuple(arcs_in.size());
-    Store_field(result, 1, arcs);
+    set_field(result, 1, arcs);
     int i = 0;
     for (std::vector<ActionLog::Arc>::const_iterator it = arcs_in.begin();
             it != arcs_in.end(); it++, i++) {
-        Store_field(arcs, i, parse_arc(*it));
+        set_field(arcs, i, parse_arc(*it));
     }
     return result;
 }
