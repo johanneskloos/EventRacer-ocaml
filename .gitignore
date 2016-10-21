@@ -6,6 +6,5 @@
 dumpLog
 printCleanLog
 splitOutJS
-Makefile
 configure
 setup.ml
