@@ -1,1 +1,1 @@
-PKG fmt ocamlgraph batteries pcre
+PKG fmt ocamlgraph batteries pcre ocamlbuild
