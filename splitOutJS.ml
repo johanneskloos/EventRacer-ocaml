@@ -22,13 +22,7 @@ let pp_command pp = function
   | Write (ref, None) ->
       pf pp "@[<hov 2>Write@ %a@]"
         pp_reference ref
-  | Post (id, Some (src, Some duration, tgt)) ->
-      pf pp "@[<hov 2>Triggering %d@ (edge: %d -%d-> %d)@]"
-        id src duration tgt
-  | Post (id, Some (src, None, tgt)) ->
-      pf pp "@[<hov 2>Triggering %d@ (edge: %d -> %d)@]"
-        id src tgt
-  | Post (id, None) ->
+  | Post id ->
       pf pp "@[<hov 2>Triggering %d@]" id
   | Enter scope ->
       pf pp "@[<hov 2>Entering scope@ %a@]"

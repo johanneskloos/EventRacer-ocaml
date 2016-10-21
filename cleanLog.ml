@@ -22,7 +22,7 @@ module DependencyGraph =
 type command =
   | Read of reference * reference option
   | Write of reference * reference option
-  | Post of int * DependencyGraph.edge option
+  | Post of int
   | Enter of reference
   | Exit
 
@@ -67,10 +67,7 @@ let translate_event arcs id ({ evtype; commands }: EventRacer.event_action) =
                 | _ -> translate (i+1) (Write (loc, None) :: l)
             end else translate (i+1) (Write (loc, None) :: l)
         | Post id ->
-            if 0 <= id && id < Array.length arcs then
-              translate (i+1) (Post (id, Some (translate_arc arcs.(id))) :: l)
-            else
-              translate (i+1) (Post (id, None) :: l)
+            translate (i+1) (Post id :: l)
         | Enter_scope ref ->
             translate (i+1) (Enter ref :: l)
         | Exit_scope ->

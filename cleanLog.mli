@@ -3,7 +3,7 @@ module DependencyGraph :
 type command =
     Read of EventRacer.reference * EventRacer.reference option
   | Write of EventRacer.reference * EventRacer.reference option
-  | Post of int * DependencyGraph.edge option
+  | Post of int
   | Enter of EventRacer.reference
   | Exit
 type event = {
