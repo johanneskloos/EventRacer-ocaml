@@ -1,0 +1,7 @@
+version = "0.1"
+description =
+"Parse EventRacer event log files"
+requires = ""
+archive(byte) = "eventRacer.cma"
+archive(native) = "eventRacer.cmxa"
+exists_if = "eventRacer.cma"
