@@ -42,4 +42,4 @@ let _ = Callback.register_exception "open_exception" OpenException
 let _ = Callback.register_exception "read_exception" ReadException
 let _ = Callback.register_exception "parse_exception" ParseException
 
-external read_event_log: string -> event_log = "read_event_log"
+external read_event_log: string -> event_log = "caml_read_event_log"
