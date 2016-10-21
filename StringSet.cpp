@@ -25,7 +25,7 @@ int StringSet::addString(const char* s) {
 }
 
 const char* StringSet::getString(int index) const {
-    if (index < m_data.size()) {
+    if (index < 0 || static_cast<unsigned int>(index) < m_data.size()) {
 	return m_data.data() + index;
     } else {
         return nullptr;
@@ -53,7 +53,7 @@ int StringSet::addStringL(const char* s, int slen) {
 	return pos;
 }
 
-int StringSet::findStringL(const char* s, int slen, int hash) const {
+int StringSet::findStringL(const char* s, int, int hash) const {
 	if (m_hashes.size() == 0) return -1;
 	size_t p = hash % m_hashes.size();
 	while (m_hashes[p] != -1) {
