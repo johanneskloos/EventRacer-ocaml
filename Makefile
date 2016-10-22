@@ -1,8 +1,9 @@
 LIBCXXSOURCES=Interface.cpp ActionLog.cpp StringSet.cpp
 LIBOCAMLSOURCES=eventRacer.ml cleanLog.mli cleanLog.ml
+LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(LIBOCAMLSOURCES))
 PROGOCAMLSOURCES=dumpLog.ml printCleanLog.ml splitOutJS.ml
 LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
-FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre -linkpkg
+FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre
 LIBBASE=eventracer
 PROGRAMS=$(patsubst %.ml,%,$(PROGOCAMLSOURCES))
 CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g
@@ -14,15 +15,15 @@ $(LIBBASE).cma $(LIBBASE).cmxa $(LIBBASE).a dll$(LIBBASE).so: \
 	ocamlfind ocamlmklib $(FINDOPTS) -o $(LIBBASE) -oc $(LIBBASE) $^ -lstdc++
 
 %: $(LIBBASE).cmxa %.ml
-	ocamlfind ocamlopt -o $@ $^ $(FINDOPTS) -ccopt -L.
+	ocamlfind ocamlopt -o $@ $^ $(FINDOPTS) -ccopt -L. -linkpkg
 
 clean:
 	rm -f *~ *.cm* *.o *.a *.so $(PROGRAMS)
 
 install: $(LIBBASE).cma
-	ocamlfind install event-racer META *.a *.so $(LIBBASE).cma $(LIBBASE).cmxa
+	ocamlfind install eventracer META *.a *.so $(LIBBASE).cma $(LIBBASE).cmxa $(LIBOCAMLIFS)
 
 remove:
-	ocamlfind remove event-racer
+	ocamlfind remove eventracer
 
 reinstall: remove install

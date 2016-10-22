@@ -1,7 +1,7 @@
 version = "0.1"
 description =
 "Parse EventRacer event log files"
-requires = ""
-archive(byte) = "eventRacer.cma"
-archive(native) = "eventRacer.cmxa"
-exists_if = "eventRacer.cma"
+requires = "pcre ocamlgraph fmt batteries"
+archive(byte) = "eventracer.cma"
+archive(native) = "eventracer.cmxa"
+exists_if = "eventracer.cma"
