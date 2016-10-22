@@ -6,7 +6,9 @@ LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
 FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre
 LIBBASE=eventracer
 PROGRAMS=$(patsubst %.ml,%,$(PROGOCAMLSOURCES))
-CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g
+OCAMLINCLUDE=$(shell opam config list | awk '$$1 == "lib" {print $$2}')/ocaml
+
+CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g -I $(OCAMLINCLUDE)
 
 all: $(LIBBASE).cma $(PROGRAMS)
 
