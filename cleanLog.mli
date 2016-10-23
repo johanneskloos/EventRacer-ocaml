@@ -1,10 +1,10 @@
 module DependencyGraph :
   Graph.Sig.P with type V.t = int with type E.t = int * int option * int
 type command =
-    Read of EventRacer.reference * EventRacer.reference option
-  | Write of EventRacer.reference * EventRacer.reference option
+    Read of string option * string option
+  | Write of string option * string option
   | Post of int
-  | Enter of EventRacer.reference
+  | Enter of string option
   | Exit
 type event = {
   evtype : EventRacer.event_action_type;
@@ -12,4 +12,4 @@ type event = {
   commands : command list;
 }
 type trace = { events : event list; deps : DependencyGraph.t; }
-val load_and_filter : string -> trace
+val load : string -> trace

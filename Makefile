@@ -1,7 +1,7 @@
 LIBCXXSOURCES=Interface.cpp ActionLog.cpp StringSet.cpp
-LIBOCAMLSOURCES=eventRacer.ml cleanLog.mli cleanLog.ml
+LIBOCAMLSOURCES=eventRacer.mli eventRacer.ml cleanLog.mli cleanLog.ml
 LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(LIBOCAMLSOURCES))
-PROGOCAMLSOURCES=dumpLog.ml printCleanLog.ml splitOutJS.ml
+PROGOCAMLSOURCES=dumpLog.ml
 LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
 FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre
 LIBBASE=eventracer

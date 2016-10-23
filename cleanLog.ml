@@ -20,10 +20,10 @@ module DependencyGraph =
   Graph.Persistent.Digraph.ConcreteBidirectionalLabeled(BatIntHash)(IntOption)
 
 type command =
-  | Read of reference * reference option
-  | Write of reference * reference option
+  | Read of string option * string option
+  | Write of string option * string option
   | Post of int
-  | Enter of reference
+  | Enter of string option
   | Exit
 
 type event = {
@@ -56,14 +56,14 @@ let translate_event arcs id ({ evtype; commands }: EventRacer.event_action) =
             if i + 1 < Array.length commands then begin
               match commands.(i+1) with
                 | Value value ->
-                    translate (i+2) (Read (loc, Some value) :: l)
+                    translate (i+2) (Read (loc, value) :: l)
                 | _ -> translate (i+1) (Read (loc, None) :: l)
             end else translate (i+1) (Read (loc, None) :: l)
         | Write_memory loc ->
             if i + 1 < Array.length commands then begin
               match commands.(i+1) with
                 | Value value ->
-                    translate (i+2) (Write (loc, Some value) :: l)
+                    translate (i+2) (Write (loc, value) :: l)
                 | _ -> translate (i+1) (Write (loc, None) :: l)
             end else translate (i+1) (Write (loc, None) :: l)
         | Post id ->
@@ -85,44 +85,5 @@ let translate_trace { events; arcs } =
   let deps = build_dependency_graph arcs
   in { events = translate_events arcs events; deps }
 
-let irrelevant_scopes =
-  Pcre.regexp ~study:true ~flags:[`ANCHORED]
-    "(eh:mousemove|event:mouse(move|over|out))"
-let irrelevant_location =
-  Pcre.regexp ~study:true ~flags:[`ANCHORED]
-    "(NodeTree:0x[0-9a-f]*|[0-9a-fx[]*]\\.mouse(move|over|out))"
-
-let is_irrelevant_event { commands } =
-  List.for_all
-    (function
-       | Enter (String (_, s)) -> Pcre.pmatch ~rex:irrelevant_scopes s
-       | Exit -> true
-       | Read (String (_, s), _) -> Pcre.pmatch ~rex:irrelevant_location s
-       | Write (String (_, s), _) -> Pcre.pmatch ~rex:irrelevant_location s
-       | _ -> false)
-    commands
-
-let filter_irrelevant_events { events; deps } =
-  let compress_deps deps' { id } =
-    if not (DependencyGraph.mem_vertex deps' id) then
-      deps'
-    else
-      let deps'' = DependencyGraph.fold_pred_e
-                     (fun (src, lbl1, _) deps' ->
-                        DependencyGraph.fold_succ_e
-                          (fun (_, lbl2, tgt) deps' ->
-                             let lbl = match lbl1, lbl2 with
-                               | Some lbl1, Some lbl2 -> Some (lbl1 + lbl2)
-                               | _, None -> lbl1
-                               | None, _ -> lbl2
-                             in DependencyGraph.add_edge_e deps' (src, lbl, tgt))
-                          deps id deps')
-                     deps id deps'
-      in DependencyGraph.remove_vertex deps'' id
-  in let (irrelevant, relevant) = BatList.partition is_irrelevant_event events
-  in { events = relevant; deps = List.fold_left compress_deps deps irrelevant }
-
-let load_and_filter filename =
-  EventRacer.read_event_log filename
-    |> translate_trace
-    |> filter_irrelevant_events
+let load filename =
+  EventRacer.read_event_log filename |> translate_trace

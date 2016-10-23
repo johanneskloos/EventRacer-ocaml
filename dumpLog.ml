@@ -1,10 +1,7 @@
 open Fmt
 open EventRacer
 
-let pp_reference pp = function
-  | Nothing -> string pp "(none)"
-  | String (id, name) -> pf pp "%s (%d)" name id
-  | Number id -> braces int  pp id
+let pp_reference = Fmt.option ~none:(Fmt.const Fmt.string "(none") Fmt.string
 
 let pp_command pp = function
   | Enter_scope ref ->
@@ -21,7 +18,7 @@ let pp_command pp = function
       string pp "Exiting scope"
 
 let str_event_action_type = function
-  | Unkown -> "unknown"
+  | Unknown -> "unknown"
   | Timer -> "timer"
   | UserInterface -> "user interface"
   | Network -> "network"
@@ -45,17 +42,9 @@ let pp_event_log pp { events; arcs } =
     (array ~sep:sp pp_arc) arcs
 
 let dump_one filename =
-  try
-    Format.printf "@[<v>Log file %s:@ %a@ @ @]"
-      filename
-      pp_event_log (read_event_log filename)
-  with
-    | OpenException ->
-        Format.printf "Cannot open %s" filename
-    | ReadException ->
-        Format.printf "Cannot read %s" filename
-    | ParseException ->
-        Format.printf "Cannot parse %s" filename
+  Format.printf "@[<v>Log file %s:@ %a@ @ @]"
+    filename
+    pp_event_log (read_event_log filename)
 
 let () =
   Arg.parse [] dump_one "Usage: dumpLog logfiles"
