@@ -1,6 +1,7 @@
 LIBCXXSOURCES=Interface.cpp ActionLog.cpp StringSet.cpp
 LIBOCAMLSOURCES=eventRacer.mli eventRacer.ml cleanLog.mli cleanLog.ml
 LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(LIBOCAMLSOURCES))
+LIBCMXFILES=$(patsubst %.ml,%.cmx,$(filter-out %.mli,$(LIBOCAMLSOURCES)))
 PROGOCAMLSOURCES=dumpLog.ml
 LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
 FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre
@@ -23,7 +24,7 @@ clean:
 	rm -f *~ *.cm* *.o *.a *.so $(PROGRAMS)
 
 install: $(LIBBASE).cma
-	ocamlfind install eventracer META *.a *.so $(LIBBASE).cma $(LIBBASE).cmxa $(LIBOCAMLIFS)
+	ocamlfind install eventracer META *.a *.so $(LIBBASE).cma $(LIBBASE).cmxa $(LIBOCAMLIFS) $(LIBCMXFILES)
 
 remove:
 	ocamlfind remove eventracer
