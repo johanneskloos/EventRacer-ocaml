@@ -9,3 +9,4 @@ splitOutJS
 configure
 setup.ml
 *.log
+rawDump
