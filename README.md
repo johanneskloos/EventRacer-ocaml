@@ -2,7 +2,7 @@
 
 TLDR: An OCaml API for the EventRacer action log file format.
 
-The [[http://eventracer.org|EventRacer]] project provides instrumented browsers that output event traces of their operation.
+The [EventRacer](http://eventracer.org) project provides instrumented browsers that output event traces of their operation.
 These traces are extremely useful for building dynamic analyses of JavaScript and web pages; for instance,
 EventRacer itself provides a race detection tool.
 
