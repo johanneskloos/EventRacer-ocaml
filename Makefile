@@ -4,7 +4,7 @@ LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(LIBOCAMLSOURCES))
 LIBCMXFILES=$(patsubst %.ml,%.cmx,$(filter-out %.mli,$(LIBOCAMLSOURCES)))
 PROGOCAMLSOURCES=dumpLog.ml
 LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
-FINDOPTS=-package batteries -package fmt -package ocamlgraph -package pcre
+FINDOPTS=-package fmt -package ocamlgraph
 LIBBASE=eventracer
 PROGRAMS=$(patsubst %.ml,%,$(PROGOCAMLSOURCES))
 OCAMLINCLUDE=$(shell opam config list | awk '$$1 == "lib" {print $$2}')/ocaml

@@ -1,7 +1,9 @@
 open EventRacer
 
-module BatIntHash = struct
-  include BatInt
+module IntHash = struct
+  type t = int
+  let equal: int -> int -> bool = (=)
+  let compare: int -> int -> int = compare
   let hash (x: int) = x
 end
 
@@ -17,7 +19,7 @@ module IntOption = struct
 end
 
 module DependencyGraph =
-  Graph.Persistent.Digraph.ConcreteBidirectionalLabeled(BatIntHash)(IntOption)
+  Graph.Persistent.Digraph.ConcreteBidirectionalLabeled(IntHash)(IntOption)
 
 type command =
   | Read of string option * string option
@@ -75,11 +77,11 @@ let translate_event arcs id ({ evtype; commands }: EventRacer.event_action) =
         | Value _ ->
             Format.eprintf "Unexpected value in event %d, command %d" id i;
             translate (i+1) l
-    end else BatList.rev l
+    end else List.rev l
   in { evtype; id; commands = translate 0 [] }
 
 let translate_events arcs events =
-  BatArray.mapi (translate_event arcs) events |> BatArray.to_list
+  Array.mapi (translate_event arcs) events |> Array.to_list
 
 let translate_trace { events; arcs } =
   let deps = build_dependency_graph arcs
