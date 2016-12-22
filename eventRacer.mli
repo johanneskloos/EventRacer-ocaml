@@ -1,8 +1,11 @@
 (** {1 Access to raw EventRacer log files} *)
 (** This module allows access to the raw contents of EventRacer log files,
-  * decoded only to the point where the enumerations have been resolved,
-  * strings instantiated and basic data structures turned to their OCaml
-  * equivalent. *)
+    decoded only to the point where the enumerations have been resolved,
+    strings instantiated and basic data structures turned to their OCaml
+    equivalent.
+    
+    It is recommended to use the functionality in [CleanLog] instead.
+    *)
 
 (** Command types, used in event actions. *)
 type command =
@@ -31,5 +34,5 @@ type event_action = { evtype : event_action_type; commands : command array; }
 type event_log = { events : event_action array; arcs : arc array; }
 
 (** [read_event_log filename] reads an event log from the given
-  * file. *)
+    file. *)
 val read_event_log : string -> event_log
