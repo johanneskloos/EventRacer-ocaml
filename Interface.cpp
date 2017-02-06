@@ -19,8 +19,13 @@
 #include <stdio.h>
 #include <exception>
 #include <map>
-#include "StringSet.h"
-#include "ActionLog.h"
+#include <StringSet.h>
+#include <ActionLog.h>
+#include <EventGraph.h>
+#include <EventGraphInfo.h>
+#include <GraphFix.h>
+#include <TimerGraph.h>
+#include <VarsInfo.h>
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
 #include <caml/memory.h>
@@ -33,6 +38,10 @@ struct Log {
     ActionLog m_actions;
     StringSet m_js;
     StringSet m_memValues;
+    SimpleDirectedGraph m_inputEvs;
+    SimpleDirectedGraph m_timer;
+    EventGraphInfo m_graphInfo;
+    VarsInfo m_races;
 };
 
 const Log *load(const char *filename) {
@@ -54,6 +63,28 @@ const Log *load(const char *filename) {
     fclose(f);
     if (!result)
         return nullptr;
+
+    log->m_inputEvs.addNodesUpTo(log->m_actions.maxEventActionId());
+    for (auto it(log->m_actions.arcs().begin());
+            it != log->m_actions.arcs().end(); it++) {
+        log->m_inputEvs.addArcIfNeeded(it->m_tail, it->m_head);
+    }
+    log->m_graphInfo.init(log->m_actions);
+
+    EventGraphFixer fixer(&log->m_actions, &log->m_vars, &log->m_scopes,
+            &log->m_inputEvs, &log->m_graphInfo);
+    fixer.dropNoFollowerEmptyEvents();
+    fixer.makeIndependentEventExploration();
+    fixer.addScriptsAndResourcesHappensBefore();
+    fixer.addEventAfterTargetHappensBefore();
+
+    log->m_timer = log->m_inputEvs;
+    TimerGraph timer_graph(log->m_actions.arcs(), log->m_timer);
+    timer_graph.build(&log->m_timer);
+
+    log->m_races.init(log->m_actions);
+    log->m_races.findRaces(log->m_actions, log->m_timer);
+
     return log;
 }
 
@@ -159,5 +190,29 @@ extern "C" {
 	int idx = Int_val(_idx);
 	const Log *log = log_ptr(_log);
 	CAMLreturn(caml_copy_string(log->m_memValues.getString(idx)));
+    }
+
+    CAMLprim value caml_num_races(value _log) {
+        CAMLparam1(_log);
+        const Log *log = log_ptr(_log);
+        CAMLreturn(Val_int(log->m_races.races().size()));
+    }
+
+    CAMLprim value caml_nth_race(value _log, value _idx) {
+        CAMLparam2(_log, _idx);
+        CAMLlocal1(result);
+        int idx = Int_val(_idx);
+        const Log *log = log_ptr(_log);
+        const VarsInfo::RaceInfo& info = log->m_races.races()[idx];
+        result = caml_alloc_tuple(8);
+        Store_field(result, 0, Val_int(info.m_access1));
+        Store_field(result, 1, Val_int(info.m_access2));
+        Store_field(result, 2, Val_int(info.m_event1));
+        Store_field(result, 3, Val_int(info.m_event2));
+        Store_field(result, 4, Val_int(info.m_cmdInEvent1));
+        Store_field(result, 5, Val_int(info.m_cmdInEvent2));
+        Store_field(result, 6, Val_int(info.m_varId));
+        Store_field(result, 7, Val_int(info.m_coveredBy));
+        CAMLreturn(result);
     }
 }

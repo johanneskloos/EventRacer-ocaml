@@ -11,7 +11,8 @@ OCAMLINCLUDE=$(shell opam config list | awk '$$1 == "lib" {print $$2}')/ocaml
 EVENTRACER=/home/jkloos/workspace/EventRacer
 
 CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g -I $(OCAMLINCLUDE) \
-    -I $(EVENTRACER)/src/eventracer/input
+    -I $(EVENTRACER)/src/eventracer/input -I $(EVENTRACER)/src/eventracer/races \
+    -I $(EVENTRACER)/src/eventracer/util -I $(EVENTRACER)/src/base
 
 all: $(LIBBASE).cma $(PROGRAMS)
 
@@ -19,6 +20,9 @@ $(LIBBASE).cma $(LIBBASE).cmxa $(LIBBASE).a dll$(LIBBASE).so: \
     $(LIBCXXOBJECTS) $(LIBOCAMLSOURCES)
 	ocamlfind ocamlmklib $(FINDOPTS) -o $(LIBBASE) -oc $(LIBBASE) $^ \
 	    -L $(EVENTRACER)/bin/eventracer/input -leventracer_input \
+	    -L $(EVENTRACER)/bin/eventracer/races -leventracer_races \
+	    -L $(EVENTRACER)/bin/eventracer/util -leventracer_util \
+	    -L $(EVENTRACER)/bin/base -lbase -lgflags \
 	    -lstdc++
 
 %: $(LIBBASE).cmxa %.ml
