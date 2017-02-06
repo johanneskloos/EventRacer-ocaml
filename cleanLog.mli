@@ -42,6 +42,7 @@ type trace = {
   (** List of events. *)
   deps : DependencyGraph.t;
   (** Happens-before graph. *)
+  races : EventRacer.race_info list
 }
 
 (** [load filename]: Load a trace from [filename]. *)
