@@ -25,9 +25,22 @@ type event_action = {
   commands: command array
 }
 
+type access_type = Read | Write | Update
+type race_info = {
+  ri_access1: access_type;
+  ri_access2: access_type;
+  ri_event1: int;
+  ri_event2: int;
+  ri_cmd1: int;
+  ri_cmd2: int;
+  ri_var: int;
+  ri_covered: int
+}
+
 type event_log = {
   events: event_action array;
-  arcs: arc array
+  arcs: arc array;
+  races: race_info array
 }
 
 (* Internal C++ interface *)
@@ -54,6 +67,8 @@ external get_var: log_ptr -> int -> string = "caml_get_var"
 external nth_event: log_ptr -> int -> internal_event = "caml_nth_event"
 external nth_arc: log_ptr -> int -> arc = "caml_nth_arc"
 external nth_command: command_ptr -> int -> internal_command = "caml_nth_command"
+external num_races: log_ptr -> int = "caml_num_races"
+external nth_race: log_ptr -> int -> race_info = "caml_nth_race"
 
 let cached f log =
   let cache = Hashtbl.create 65537 in
@@ -69,6 +84,7 @@ let read_event_log filename =
   let log = load filename
   in if usable log then
     let arcs = Array.init (num_arcs log) (nth_arc log)
+    and races = Array.init (num_races log) (nth_race log)
     and _ = cached get_js log
     and cached_mem_value = cached get_mem_value log
     and cached_scope = cached get_scope log
@@ -102,6 +118,6 @@ let read_event_log filename =
 		       Value (Some (cached_mem_value ic_arg))
 		     | _ -> raise Not_found)
        in { evtype; commands })
-    in { arcs; events }
+    in { arcs; events; races }
   else failwith ("Couldn't parse " ^ filename)
 

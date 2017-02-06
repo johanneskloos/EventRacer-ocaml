@@ -30,8 +30,27 @@ type arc = { tail : int; head : int; duration : int; }
 (** An event action, consisting of type and executed commands. *)
 type event_action = { evtype : event_action_type; commands : command array; }
 
-(** An event log, consisting of events and hb graph edges .*)
-type event_log = { events : event_action array; arcs : arc array; }
+(** Different types of accesses to a variable. *)
+type access_type =
+    Read (** The write is only read, but not written to. *)
+  | Write (** The variable is written to, with no previous read. *)
+  | Update (** The variable is first read and then written to. *)
+
+(** Information about a race. *)
+type race_info = {
+  ri_access1: access_type; (** Access type of the first racing event. *)
+  ri_access2: access_type; (** Access type of the second racing event. *)
+  ri_event1: int; (** Number of the first racing event. *)
+  ri_event2: int; (** Number of the second racing event. *)
+  ri_cmd1: int; (** Number of the command in the first racing event. *)
+  ri_cmd2: int; (** Number of the command in the second racing event. *)
+  ri_var: int; (** Variable involved in the race. *)
+  ri_covered: int (** Parent race that covers this race. *)
+}
+
+
+(** An event log, consisting of events, hb graph edges and races.*)
+type event_log = { events : event_action array; arcs : arc array; races: race_info array }
 
 (** [read_event_log filename] reads an event log from the given
     file. *)
