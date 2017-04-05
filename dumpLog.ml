@@ -46,10 +46,10 @@ let pp_access = using str_access string
 let pp_race pp
       { ri_access1; ri_access2; ri_event1; ri_event2; ri_cmd1; ri_cmd2;
         ri_var; ri_covered } =
-  pf pp "@[<hov>%a@%d:%d -@ %a@%d:%d@ on %d,@ parent: %d@]"
+  pf pp "@[<hov>%a@%d:%d -@ %a@%d:%d@ on %a,@ parent: %a@]"
     pp_access ri_access1 ri_event1 ri_cmd1
     pp_access ri_access2 ri_event2 ri_cmd2
-    ri_var ri_covered
+    (option string) ri_var (option int) ri_covered
 
 let pp_event_log pp { events; arcs; races } =
   pf pp "@[<v>Events:@ %a@ @ @[<v2>Arcs:@ %a@ @]@ @ @[<v2>Races:@,%a@ ]@]"

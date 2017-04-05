@@ -33,8 +33,8 @@ type race_info = {
   ri_event2: int;
   ri_cmd1: int;
   ri_cmd2: int;
-  ri_var: int;
-  ri_covered: int
+  ri_var: string option;
+  ri_covered: int option
 }
 
 type event_log = {
@@ -55,6 +55,16 @@ type internal_command = {
   ic_type: int;
   ic_arg: int
 }
+type internal_race_info = {
+  ir_access1: access_type;
+  ir_access2: access_type;
+  ir_event1: int;
+  ir_event2: int;
+  ir_cmd1: int;
+  ir_cmd2: int;
+  ir_var: int;
+  ir_covered: int
+}
 external load: string -> log_ptr = "caml_load"
 external usable: log_ptr -> bool = "caml_usable"
 external free: log_ptr -> unit = "caml_free"
@@ -68,7 +78,7 @@ external nth_event: log_ptr -> int -> internal_event = "caml_nth_event"
 external nth_arc: log_ptr -> int -> arc = "caml_nth_arc"
 external nth_command: command_ptr -> int -> internal_command = "caml_nth_command"
 external num_races: log_ptr -> int = "caml_num_races"
-external nth_race: log_ptr -> int -> race_info = "caml_nth_race"
+external nth_race: log_ptr -> int -> internal_race_info = "caml_nth_race"
 
 let cached f log =
   let cache = Hashtbl.create 65537 in
@@ -84,7 +94,6 @@ let read_event_log filename =
   let log = load filename
   in if usable log then
     let arcs = Array.init (num_arcs log) (nth_arc log)
-    and races = Array.init (num_races log) (nth_race log)
     and _ = cached get_js log
     and cached_mem_value = cached get_mem_value log
     and cached_scope = cached get_scope log
@@ -118,6 +127,22 @@ let read_event_log filename =
 		       Value (Some (cached_mem_value ic_arg))
 		     | _ -> raise Not_found)
        in { evtype; commands })
+    and races = Array.init (num_races log)
+                  (fun i ->
+                     let { ir_access1; ir_access2; ir_event1; ir_event2;
+                           ir_cmd1; ir_cmd2; ir_var; ir_covered } =
+                       nth_race log i
+                     in { ri_access1 = ir_access1;
+                          ri_access2 = ir_access2;
+                          ri_event1 = ir_event1;
+                          ri_event2 = ir_event2;
+                          ri_cmd1 = ir_cmd1;
+                          ri_cmd2 = ir_cmd2;
+                          ri_var =
+                            if ir_var = -1 then None
+                            else Some (cached_var ir_var);
+                          ri_covered =
+                            if ir_covered = -1 then None else Some ir_covered })
     in { arcs; events; races }
   else failwith ("Couldn't parse " ^ filename)
 

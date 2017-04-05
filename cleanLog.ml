@@ -84,9 +84,10 @@ let translate_event arcs id ({ evtype; commands }: EventRacer.event_action) =
 let translate_events arcs events =
   Array.mapi (translate_event arcs) events |> Array.to_list
 
+let translate_races races = Array.to_list races
 let translate_trace { events; arcs; races } =
   let deps = build_dependency_graph arcs
-  in { events = translate_events arcs events; deps; races = Array.to_list races }
+  in { events = translate_events arcs events; deps; races = translate_races races }
 
 let load filename =
   EventRacer.read_event_log filename |> translate_trace

@@ -44,8 +44,8 @@ type race_info = {
   ri_event2: int; (** Number of the second racing event. *)
   ri_cmd1: int; (** Number of the command in the first racing event. *)
   ri_cmd2: int; (** Number of the command in the second racing event. *)
-  ri_var: int; (** Variable involved in the race. *)
-  ri_covered: int (** Parent race that covers this race. *)
+  ri_var: string option; (** Variable involved in the race. *)
+  ri_covered: int option (** Parent race that covers this race. *)
 }
 
 
