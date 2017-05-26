@@ -1,6 +1,6 @@
 LIBCXXSOURCES=Interface.cpp
 LIBOCAMLSOURCES=eventRacer.mli eventRacer.ml cleanLog.mli cleanLog.ml
-LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(LIBOCAMLSOURCES))
+LIBOCAMLIFS=$(patsubst %.ml,%.cmi,$(patsubst %.mli,%.cmi,$(LIBOCAMLSOURCES)))
 LIBCMXFILES=$(patsubst %.ml,%.cmx,$(filter-out %.mli,$(LIBOCAMLSOURCES)))
 PROGOCAMLSOURCES=dumpLog.ml
 LIBCXXOBJECTS=$(patsubst %.cpp,%.o,$(LIBCXXSOURCES))
@@ -8,22 +8,15 @@ FINDOPTS=-package fmt -package ocamlgraph
 LIBBASE=eventracer
 PROGRAMS=$(patsubst %.ml,%,$(PROGOCAMLSOURCES))
 OCAMLINCLUDE=$(shell opam config list | awk '$$1 == "lib" {print $$2}')/ocaml
-EVENTRACER=/home/jkloos/workspace/EventRacer
 
-CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g -I $(OCAMLINCLUDE) \
-    -I $(EVENTRACER)/src/eventracer/input -I $(EVENTRACER)/src/eventracer/races \
-    -I $(EVENTRACER)/src/eventracer/util -I $(EVENTRACER)/src/base
+CXXFLAGS:=$(CXXFLAGS) -fPIC -O2 -Wall -Wextra -g -I $(OCAMLINCLUDE)
 
 all: $(LIBBASE).cma $(PROGRAMS)
 
 $(LIBBASE).cma $(LIBBASE).cmxa $(LIBBASE).a dll$(LIBBASE).so: \
     $(LIBCXXOBJECTS) $(LIBOCAMLSOURCES)
 	ocamlfind ocamlmklib $(FINDOPTS) -o $(LIBBASE) -oc $(LIBBASE) $^ \
-	    -L $(EVENTRACER)/bin/eventracer/input -leventracer_input \
-	    -L $(EVENTRACER)/bin/eventracer/races -leventracer_races \
-	    -L $(EVENTRACER)/bin/eventracer/util -leventracer_util \
-	    -L $(EVENTRACER)/bin/base -lbase -lgflags \
-	    -lstdc++
+	    -lEventRacer -lstdc++
 
 %: $(LIBBASE).cmxa %.ml
 	ocamlfind ocamlopt -o $@ $^ $(FINDOPTS) -ccopt -L. -linkpkg
